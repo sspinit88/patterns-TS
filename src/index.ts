@@ -49,8 +49,6 @@ class Duck {
   performQuack(): void {
     this.quackBehavior.quack();
   }
-
-
 }
 
 /*
