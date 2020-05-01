@@ -82,6 +82,11 @@ class CurrentConditionsDisplay implements Observer, DisplayElement {
     humidity: undefined,
   };
 
+  /*
+  * конструктору передается объект,
+  * который используется для регистрации
+  * элемента в качестве наблюдателя.
+  * */
   constructor(weatherStation: Subject) {
     this.subject = { ...weatherStation };
     weatherStation.registerObserver(this);
