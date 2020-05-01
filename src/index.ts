@@ -28,6 +28,10 @@ interface Weather {
   pressure: number | undefined;
 }
 
+/*
+* класс субъекта
+* */
+
 class WeatherData implements Subject {
 
   private observers: Observer[] = [];
