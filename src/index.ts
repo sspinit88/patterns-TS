@@ -1,100 +1,129 @@
-/*
-* интерфейс стратегии
-* */
-interface FlyBehavior {
-  fly(): void;
+interface Subject {
+  registerObserver(o: Observer): void;
+
+  removeObserver(o: Observer): void;
+
+  notifyObservers(): void;
 }
 
 /*
-* интерфейс стратегии
+* Интерфейс Observer реализуется всеми наблюдателями.
 * */
-interface QuackBehavior {
-  quack(): void;
+interface Observer {
+  // Получить обновление от субъекта.
+  update(updateData: Weather): void;
 }
 
 /*
- * Класс - контекст определяет интерфейс, представляющий интерес для клиентов.
- * */
-class Duck {
-  flyBehavior: FlyBehavior;
-  quackBehavior: QuackBehavior;
+* сторонние интерфейсы
+* */
 
-  constructor(
-    flyBehavior: FlyBehavior,
-    quackBehavior: QuackBehavior,
-  ) {
-    this.flyBehavior = flyBehavior;
-    this.quackBehavior = quackBehavior;
+interface DisplayElement {
+  display(): void;
+}
+
+interface Weather {
+  temperature: number | undefined;
+  humidity: number | undefined;
+  pressure: number | undefined;
+}
+
+class WeatherData implements Subject {
+
+  private observers: Observer[] = [];
+  private weather: Weather = {
+    temperature: undefined,
+    pressure: undefined,
+    humidity: undefined,
+  };
+
+  constructor() {
+  }
+
+  setWeather(w: Weather): void {
+    this.weather = { ...w };
+    this.notifyObservers();
+  }
+
+  registerObserver(o: Observer): void {
+    this.observers.push(o);
+  }
+
+  removeObserver(o: Observer): void {
+    const index: number = this.observers.indexOf(o);
+
+    if (!!index) {
+      this.observers.splice(index, 1);
+    }
+  }
+
+  notifyObservers(): void {
+    this.observers
+      .forEach((observer, i) => {
+        observer.update(this.weather);
+      });
+  }
+}
+
+/*
+* класс наблюдателя
+* */
+
+class CurrentConditionsDisplay implements Observer, DisplayElement {
+
+  private subject: Subject;
+  private weather: Weather = {
+    temperature: undefined,
+    pressure: undefined,
+    humidity: undefined,
+  };
+
+  constructor(weatherStation: Subject) {
+    this.subject = { ...weatherStation };
+    weatherStation.registerObserver(this);
+  }
+
+  update(w: Weather): void {
+    this.weather = { ...w };
+    this.display()
   }
 
   display(): void {
-
-  }
-
-  /**
-   * Обычно Контекст позволяет заменить объект Стратегии во время выполнения.
-   */
-  public setFlyBehavior(fb: FlyBehavior): void {
-    this.flyBehavior = fb;
-  }
-
-  public setQuackBehavior(fb: QuackBehavior): void {
-    this.quackBehavior = fb;
-  }
-
-  performFly(): void {
-    this.flyBehavior.fly();
-  }
-
-  performQuack(): void {
-    this.quackBehavior.quack();
-  }
-}
-
-/*
-* FlyWithWings, FlyNoWay, Quack, MuteQuack - сами стратегии
-* */
-class FlyWithWings implements FlyBehavior {
-  fly(): void {
-    console.log('Fly!');
-  }
-}
-
-class FlyNoWay implements FlyBehavior {
-  fly(): void {
-    console.log('I can\'t fly!');
-  }
-}
-
-class Quack implements QuackBehavior {
-  quack(): void {
-    console.log('Quack!');
-  }
-}
-
-class MuteQuack implements QuackBehavior {
-  quack(): void {
-    console.log('<< Silence >>');
+    console.log(
+      `temperature: ${this.weather.temperature};
+       humidity: ${this.weather.humidity};
+       pressure: ${this.weather.pressure};
+    `);
   }
 }
 
 // пример
 
-class ModelDuck extends Duck {
-  display(): void {
-    console.log('Это - ModelDuck');
-  }
-}
+const subject = new WeatherData();
 
-const model = new ModelDuck(new FlyNoWay(), new Quack());
-model.performFly();
-model.performQuack();
+const observer1 = new CurrentConditionsDisplay(subject);
+const observer2 = new CurrentConditionsDisplay(subject);
 
-model.setFlyBehavior(new FlyWithWings());
-model.setQuackBehavior(new MuteQuack());
+console.log('Обновляю данные первого и второго подписчика (.update()).');
 
-model.performFly();
-model.performQuack();
+observer1.update({
+  temperature: 35,
+  pressure: 25,
+  humidity: 15,
+});
 
-model.display();
+observer2.update({
+  temperature: 25,
+  pressure: 15,
+  humidity: 5,
+});
 
+console.log('Устанавливаю данные о погоде через subject.setWeather().');
+subject.setWeather({
+  temperature: 5,
+  humidity: 4,
+  pressure: 1,
+});
+console.log('Получаю данные первым и вторым подписчиком (.display()).');
+observer1.display();
+observer2.display();

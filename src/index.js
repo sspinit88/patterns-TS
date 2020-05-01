@@ -1,94 +1,88 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
     };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-/*
- * Класс - контекст определяет интерфейс, представляющий интерес для клиентов.
- * */
-var Duck = /** @class */ (function () {
-    function Duck(flyBehavior, quackBehavior) {
-        this.flyBehavior = flyBehavior;
-        this.quackBehavior = quackBehavior;
+    return __assign.apply(this, arguments);
+};
+var WeatherData = /** @class */ (function () {
+    function WeatherData() {
+        this.observers = [];
+        this.weather = {
+            temperature: undefined,
+            pressure: undefined,
+            humidity: undefined
+        };
     }
-    Duck.prototype.display = function () {
+    WeatherData.prototype.setWeather = function (w) {
+        this.weather = __assign({}, w);
+        this.notifyObservers();
     };
-    /**
-     * Обычно Контекст позволяет заменить объект Стратегии во время выполнения.
-     */
-    Duck.prototype.setFlyBehavior = function (fb) {
-        this.flyBehavior = fb;
+    WeatherData.prototype.registerObserver = function (o) {
+        this.observers.push(o);
     };
-    Duck.prototype.setQuackBehavior = function (fb) {
-        this.quackBehavior = fb;
+    WeatherData.prototype.removeObserver = function (o) {
+        var index = this.observers.indexOf(o);
+        if (!!index) {
+            this.observers.splice(index, 1);
+        }
     };
-    Duck.prototype.performFly = function () {
-        this.flyBehavior.fly();
+    WeatherData.prototype.notifyObservers = function () {
+        var _this = this;
+        this.observers
+            .forEach(function (observer, i) {
+            observer.update(_this.weather);
+        });
     };
-    Duck.prototype.performQuack = function () {
-        this.quackBehavior.quack();
-    };
-    return Duck;
+    return WeatherData;
 }());
 /*
-* FlyWithWings, FlyNoWay, Quack, MuteQuack - сами стратегии
+* класс наблюдателя
 * */
-var FlyWithWings = /** @class */ (function () {
-    function FlyWithWings() {
+var CurrentConditionsDisplay = /** @class */ (function () {
+    function CurrentConditionsDisplay(weatherStation) {
+        this.weather = {
+            temperature: undefined,
+            pressure: undefined,
+            humidity: undefined
+        };
+        this.subject = __assign({}, weatherStation);
+        weatherStation.registerObserver(this);
     }
-    FlyWithWings.prototype.fly = function () {
-        console.log('Fly!');
+    CurrentConditionsDisplay.prototype.update = function (w) {
+        this.weather = __assign({}, w);
+        this.display();
     };
-    return FlyWithWings;
-}());
-var FlyNoWay = /** @class */ (function () {
-    function FlyNoWay() {
-    }
-    FlyNoWay.prototype.fly = function () {
-        console.log('I can\'t fly!');
+    CurrentConditionsDisplay.prototype.display = function () {
+        console.log("temperature: " + this.weather.temperature + ";\n       humidity: " + this.weather.humidity + ";\n       pressure: " + this.weather.pressure + ";\n    ");
     };
-    return FlyNoWay;
-}());
-var Quack = /** @class */ (function () {
-    function Quack() {
-    }
-    Quack.prototype.quack = function () {
-        console.log('Quack!');
-    };
-    return Quack;
-}());
-var MuteQuack = /** @class */ (function () {
-    function MuteQuack() {
-    }
-    MuteQuack.prototype.quack = function () {
-        console.log('<< Silence >>');
-    };
-    return MuteQuack;
+    return CurrentConditionsDisplay;
 }());
 // пример
-var ModelDuck = /** @class */ (function (_super) {
-    __extends(ModelDuck, _super);
-    function ModelDuck() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    ModelDuck.prototype.display = function () {
-        console.log('Это - ModelDuck');
-    };
-    return ModelDuck;
-}(Duck));
-var model = new ModelDuck(new FlyNoWay(), new Quack());
-model.performFly();
-model.performQuack();
-model.setFlyBehavior(new FlyWithWings());
-model.setQuackBehavior(new MuteQuack());
-model.performFly();
-model.performQuack();
-model.display();
+var subject = new WeatherData();
+var observer1 = new CurrentConditionsDisplay(subject);
+var observer2 = new CurrentConditionsDisplay(subject);
+console.log('Обновляю данные первого и второго подписчика (.update()).');
+observer1.update({
+    temperature: 35,
+    pressure: 25,
+    humidity: 15
+});
+observer2.update({
+    temperature: 25,
+    pressure: 15,
+    humidity: 5
+});
+console.log('Устанавливаю данные о погоде через subject.setWeather().');
+subject.setWeather({
+    temperature: 5,
+    humidity: 4,
+    pressure: 1
+});
+console.log('Получаю данные первым и вторым подписчиком (.display()).');
+observer1.display();
+observer2.display();
