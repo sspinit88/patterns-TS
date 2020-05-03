@@ -1,138 +1,192 @@
-interface Subject {
-  registerObserver(o: Observer): void;
+/*
+* Описываем интерфейс напитков
+* */
 
-  removeObserver(o: Observer): void;
+interface Beverage {
 
-  notifyObservers(): void;
+  description: string;
+
+  getDescription(): string;
+
+  cost(): number;
+
+  display(): void
 }
 
 /*
-* Интерфейс Observer реализуется всеми наблюдателями.
-* */
-interface Observer {
-  // Получить обновление от субъекта.
-  update(updateData: Weather): void;
-}
-
-/*
-* сторонние интерфейсы
+* Класс декоратора
 * */
 
-interface DisplayElement {
-  display(): void;
-}
+class CondimentDecorator implements Beverage {
+  description: string = 'Unknown Beverage';
 
-interface Weather {
-  temperature: number | undefined;
-  humidity: number | undefined;
-  pressure: number | undefined;
-}
-
-/*
-* класс субъекта
-* */
-
-class WeatherData implements Subject {
-
-  private observers: Observer[] = [];
-  private weather: Weather = {
-    temperature: undefined,
-    pressure: undefined,
-    humidity: undefined,
-  };
-
-  constructor() {
+  cost(): number {
+    return 0;
   }
 
-  setWeather(w: Weather): void {
-    this.weather = { ...w };
-    this.notifyObservers();
-  }
-
-  registerObserver(o: Observer): void {
-    this.observers.push(o);
-  }
-
-  removeObserver(o: Observer): void {
-    const index: number = this.observers.indexOf(o);
-
-    if (!!index) {
-      this.observers.splice(index, 1);
-    }
-  }
-
-  notifyObservers(): void {
-    this.observers
-      .forEach((observer, i) => {
-        observer.update(this.weather);
-      });
-  }
-}
-
-/*
-* класс наблюдателя
-* */
-
-class CurrentConditionsDisplay implements Observer, DisplayElement {
-
-  private subject: Subject;
-  private weather: Weather = {
-    temperature: undefined,
-    pressure: undefined,
-    humidity: undefined,
-  };
-
-  /*
-  * конструктору передается объект,
-  * который используется для регистрации
-  * элемента в качестве наблюдателя.
-  * */
-  constructor(weatherStation: Subject) {
-    this.subject = { ...weatherStation };
-    weatherStation.registerObserver(this);
-  }
-
-  update(w: Weather): void {
-    this.weather = { ...w };
-    this.display()
+  getDescription(): string {
+    return this.description;
   }
 
   display(): void {
-    console.log(
-      `temperature: ${this.weather.temperature};
-       humidity: ${this.weather.humidity};
-       pressure: ${this.weather.pressure};
-    `);
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
+  }
+
+}
+
+/*
+* Описываем классы разныйх кофейных напитков.
+* */
+
+class Espresso implements Beverage {
+  description: string = 'Espresso';
+  price: number = 1.28;
+
+  cost(): number {
+    return this.price;
+  }
+
+  getDescription(): string {
+    return this.description;
+  }
+
+  display(): void {
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
   }
 }
 
-// пример
+class HouseBlend implements Beverage {
+  description: string = 'House Blend Coffee';
+  price: number = .89;
 
-const subject = new WeatherData();
+  cost(): number {
+    return this.price;
+  }
 
-const observer1 = new CurrentConditionsDisplay(subject);
-const observer2 = new CurrentConditionsDisplay(subject);
+  getDescription(): string {
+    return this.description;
+  }
 
-console.log('Обновляю данные первого и второго подписчика (.update()).');
+  display(): void {
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
 
-observer1.update({
-  temperature: 35,
-  pressure: 25,
-  humidity: 15,
-});
+class DarkRoast implements Beverage {
+  description: string = 'Dark Roast';
+  price: number = 1.59;
 
-observer2.update({
-  temperature: 25,
-  pressure: 15,
-  humidity: 5,
-});
+  cost(): number {
+    return this.price;
+  }
 
-console.log('Устанавливаю данные о погоде через subject.setWeather().');
-subject.setWeather({
-  temperature: 5,
-  humidity: 4,
-  pressure: 1,
-});
-console.log('Получаю данные первым и вторым подписчиком (.display()).');
-observer1.display();
-observer2.display();
+  getDescription(): string {
+    return this.description;
+  }
+
+  display(): void {
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
+
+class Decaf implements Beverage {
+  description: string = 'Decaf';
+  price: number = 1.25;
+
+  cost(): number {
+    return this.price;
+  }
+
+  getDescription(): string {
+    return this.description;
+  }
+
+  display(): void {
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
+
+/*
+* Декораторы
+* */
+
+class Mocha extends CondimentDecorator {
+  beverage: Beverage;
+  price: number = .20;
+
+  constructor(beverage: Beverage) {
+    super();
+    this.beverage = beverage;
+  }
+
+  getDescription(): string {
+    return `${this.beverage.getDescription()}, Mocha`;
+  }
+
+  cost(): number {
+    return this.beverage.cost() + this.price;
+  }
+
+  display(): void {
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
+
+class Soy extends CondimentDecorator {
+  beverage: Beverage;
+  price: number = .50;
+
+  constructor(beverage: Beverage) {
+    super();
+    this.beverage = beverage;
+  }
+
+  getDescription(): string {
+    return `${super.getDescription()}, Soy`;
+  }
+
+  cost(): number {
+    return this.beverage.cost() + this.price;
+  }
+
+  display(): void {
+    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
+
+class Whip extends CondimentDecorator {
+  beverage: Beverage;
+  price: number = .45;
+
+  constructor(beverage: Beverage) {
+    super();
+    this.beverage = beverage;
+  }
+
+  cost(): number {
+    return this.beverage.cost() + this.price;
+  }
+
+  display(): void {
+    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
+  }
+}
+
+/*
+* пример
+* */
+
+let beverage1 = new Espresso();
+beverage1.display();
+beverage1 = new Mocha(beverage1);
+beverage1.display();
+
+beverage1 = new Whip(beverage1);
+beverage1.display();
+
+
+let beverage2 = new DarkRoast();
+beverage2.display();
+
+beverage2 = new Soy(beverage2);
+beverage2.display();
