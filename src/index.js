@@ -1,75 +1,106 @@
-/*
-* Описываю интерфейсы пиццы и рецептов
-* */
-/*
-* Классы различной пиццы
-* */
-var CheesePizza = /** @class */ (function () {
-    function CheesePizza() {
-        this.recipe = {
-            ingredients: ['item', 'item', 'item', 'item'],
-            recipe: 'This is CheesePizza recipe.'
-        };
+/**
+ * Конкретная Фабрика производит семейство продуктов одной вариации. Фабрика
+ * гарантирует совместимость полученных продуктов. Обратите внимание, что
+ * сигнатуры методов Конкретной Фабрики возвращают абстрактный продукт, в то
+ * время как внутри метода создается экземпляр конкретного продукта.
+ */
+var ConcreteFactory1 = /** @class */ (function () {
+    function ConcreteFactory1() {
     }
-    CheesePizza.prototype.getRecipe = function () {
-        return this.recipe;
+    ConcreteFactory1.prototype.createProductA = function () {
+        return new ConcreteProductA1();
     };
-    return CheesePizza;
+    ConcreteFactory1.prototype.createProductB = function () {
+        return new ConcreteProductB1();
+    };
+    return ConcreteFactory1;
 }());
-var PepperoniPizza = /** @class */ (function () {
-    function PepperoniPizza() {
-        this.recipe = {
-            ingredients: ['item', 'item', 'item', 'item'],
-            recipe: 'This is PepperoniPizza recipe.'
-        };
+/**
+ * Каждая Конкретная Фабрика имеет соответствующую вариацию продукта.
+ */
+var ConcreteFactory2 = /** @class */ (function () {
+    function ConcreteFactory2() {
     }
-    PepperoniPizza.prototype.getRecipe = function () {
-        return this.recipe;
+    ConcreteFactory2.prototype.createProductA = function () {
+        return new ConcreteProductA2();
     };
-    return PepperoniPizza;
+    ConcreteFactory2.prototype.createProductB = function () {
+        return new ConcreteProductB2();
+    };
+    return ConcreteFactory2;
 }());
-var ClamPizza = /** @class */ (function () {
-    function ClamPizza() {
-        this.recipe = {
-            ingredients: ['item', 'item', 'item', 'item'],
-            recipe: 'This is ClamPizza recipe.'
-        };
+/**
+ * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
+ */
+var ConcreteProductA1 = /** @class */ (function () {
+    function ConcreteProductA1() {
     }
-    ClamPizza.prototype.getRecipe = function () {
-        return this.recipe;
+    ConcreteProductA1.prototype.usefulFunctionA = function () {
+        return 'The result of the product A1.';
     };
-    return ClamPizza;
+    return ConcreteProductA1;
 }());
-/*
-* класс - фабрика
-* */
-var SimplePizzaFactory = /** @class */ (function () {
-    function SimplePizzaFactory() {
-        this.pizza = null;
+var ConcreteProductA2 = /** @class */ (function () {
+    function ConcreteProductA2() {
     }
-    SimplePizzaFactory.prototype.createPizza = function (pizzaType) {
-        switch (pizzaType) {
-            case 'cheese':
-                this.pizza = new CheesePizza();
-                break;
-            case 'pepperoni':
-                this.pizza = new PepperoniPizza();
-                break;
-            case 'clam':
-                this.pizza = new ClamPizza();
-                break;
-            default:
-                this.pizza = new CheesePizza();
-                break;
-        }
-        return this.pizza;
+    ConcreteProductA2.prototype.usefulFunctionA = function () {
+        return 'The result of the product A2.';
     };
-    return SimplePizzaFactory;
+    return ConcreteProductA2;
 }());
-// example
-var order1 = new SimplePizzaFactory().createPizza('pepperoni');
-console.log('order1 (pepperoni) is: ', order1);
-var order2 = new SimplePizzaFactory().createPizza('clam');
-console.log('order1 (clam) is: ', order2);
-var order3 = new SimplePizzaFactory().createPizza('cheese');
-console.log('order1 (cheese) is: ', order3);
+/**
+ * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
+ */
+var ConcreteProductB1 = /** @class */ (function () {
+    function ConcreteProductB1() {
+    }
+    ConcreteProductB1.prototype.usefulFunctionB = function () {
+        return 'The result of the product B1.';
+    };
+    /**
+     * Продукт B1 может корректно работать только с Продуктом A1. Тем не менее,
+     * он принимает любой экземпляр Абстрактного Продукта А в качестве
+     * аргумента.
+     */
+    ConcreteProductB1.prototype.anotherUsefulFunctionB = function (collaborator) {
+        var result = collaborator.usefulFunctionA();
+        return "The result of the B1 collaborating with the (" + result + ")";
+    };
+    return ConcreteProductB1;
+}());
+var ConcreteProductB2 = /** @class */ (function () {
+    function ConcreteProductB2() {
+    }
+    ConcreteProductB2.prototype.usefulFunctionB = function () {
+        return 'The result of the product B2.';
+    };
+    /**
+     * Продукт B2 может корректно работать только с Продуктом A2. Тем не менее,
+     * он принимает любой экземпляр Абстрактного Продукта А в качестве
+     * аргумента.
+     */
+    ConcreteProductB2.prototype.anotherUsefulFunctionB = function (collaborator) {
+        var result = collaborator.usefulFunctionA();
+        return "The result of the B2 collaborating with the (" + result + ")";
+    };
+    return ConcreteProductB2;
+}());
+/**
+ * Клиентский код работает с фабриками и продуктами только через абстрактные
+ * типы: Абстрактная Фабрика и Абстрактный Продукт. Это позволяет передавать
+ * любой подкласс фабрики или продукта клиентскому коду, не нарушая его.
+ */
+function clientCode(factory) {
+    var productA = factory.createProductA();
+    var productB = factory.createProductB();
+    console.log(productB.usefulFunctionB());
+    console.log(productB.anotherUsefulFunctionB(productA));
+}
+/**
+ * Клиентский код может работать с любым конкретным классом фабрики.
+ */
+console.log('Client: Testing client code with the first factory type...');
+clientCode(new ConcreteFactory1());
+console.log('');
+console.log('Client: Testing the same client code with the second factory type...');
+clientCode(new ConcreteFactory2());
