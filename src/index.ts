@@ -1,192 +1,95 @@
 /*
-* Описываем интерфейс напитков
+* Описываю интерфейсы пиццы и рецептов
 * */
 
-interface Beverage {
+interface PizzaRecipe {
+  ingredients: string[];
+  recipe: string;
+}
 
-  description: string;
+interface Pizza {
+  recipe: PizzaRecipe;
 
-  getDescription(): string;
-
-  cost(): number;
-
-  display(): void
+  getRecipe(): PizzaRecipe;
 }
 
 /*
-* Класс декоратора
+* Классы различной пиццы
 * */
 
-class CondimentDecorator implements Beverage {
-  description: string = 'Unknown Beverage';
+class CheesePizza implements Pizza {
+  recipe: PizzaRecipe = {
+    ingredients: ['item', 'item', 'item', 'item'],
+    recipe: 'This is CheesePizza recipe.',
+  };
 
-  cost(): number {
-    return 0;
+  getRecipe(): PizzaRecipe {
+    return this.recipe;
   }
-
-  getDescription(): string {
-    return this.description;
-  }
-
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
-
 }
+
+class PepperoniPizza implements Pizza {
+  recipe: PizzaRecipe = {
+    ingredients: ['item', 'item', 'item', 'item'],
+    recipe: 'This is PepperoniPizza recipe.',
+  };
+
+  getRecipe(): PizzaRecipe {
+    return this.recipe;
+  }
+}
+
+class ClamPizza implements Pizza {
+  recipe: PizzaRecipe = {
+    ingredients: ['item', 'item', 'item', 'item'],
+    recipe: 'This is ClamPizza recipe.',
+  };
+
+  getRecipe(): PizzaRecipe {
+    return this.recipe;
+  }
+}
+
 
 /*
-* Описываем классы разныйх кофейных напитков.
+* класс - фабрика
 * */
+class SimplePizzaFactory {
 
-class Espresso implements Beverage {
-  description: string = 'Espresso';
-  price: number = 1.28;
+  private pizza: any = null;
 
-  cost(): number {
-    return this.price;
+  constructor() {
   }
 
-  getDescription(): string {
-    return this.description;
+  createPizza(pizzaType: string): Pizza {
+
+    switch (pizzaType) {
+      case 'cheese':
+        this.pizza = new CheesePizza();
+        break;
+      case 'pepperoni':
+        this.pizza = new PepperoniPizza();
+        break;
+      case 'clam':
+        this.pizza = new ClamPizza();
+        break;
+      default:
+        this.pizza = new CheesePizza();
+        break;
+    }
+
+    return this.pizza;
   }
 
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
 }
 
-class HouseBlend implements Beverage {
-  description: string = 'House Blend Coffee';
-  price: number = .89;
+// example
 
-  cost(): number {
-    return this.price;
-  }
+const order1 = new SimplePizzaFactory().createPizza('pepperoni');
+console.log('order1 (pepperoni) is: ', order1);
 
-  getDescription(): string {
-    return this.description;
-  }
+const order2 = new SimplePizzaFactory().createPizza('clam');
+console.log('order1 (clam) is: ', order2);
 
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-class DarkRoast implements Beverage {
-  description: string = 'Dark Roast';
-  price: number = 1.59;
-
-  cost(): number {
-    return this.price;
-  }
-
-  getDescription(): string {
-    return this.description;
-  }
-
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-class Decaf implements Beverage {
-  description: string = 'Decaf';
-  price: number = 1.25;
-
-  cost(): number {
-    return this.price;
-  }
-
-  getDescription(): string {
-    return this.description;
-  }
-
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-/*
-* Декораторы
-* */
-
-class Mocha extends CondimentDecorator {
-  beverage: Beverage;
-  price: number = .20;
-
-  constructor(beverage: Beverage) {
-    super();
-    this.beverage = beverage;
-  }
-
-  getDescription(): string {
-    return `${this.beverage.getDescription()}, Mocha`;
-  }
-
-  cost(): number {
-    return this.beverage.cost() + this.price;
-  }
-
-  display(): void {
-    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-class Soy extends CondimentDecorator {
-  beverage: Beverage;
-  price: number = .50;
-
-  constructor(beverage: Beverage) {
-    super();
-    this.beverage = beverage;
-  }
-
-  getDescription(): string {
-    return `${super.getDescription()}, Soy`;
-  }
-
-  cost(): number {
-    return this.beverage.cost() + this.price;
-  }
-
-  display(): void {
-    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-class Whip extends CondimentDecorator {
-  beverage: Beverage;
-  price: number = .45;
-
-  constructor(beverage: Beverage) {
-    super();
-    this.beverage = beverage;
-  }
-
-  cost(): number {
-    return this.beverage.cost() + this.price;
-  }
-
-  display(): void {
-    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
-  }
-}
-
-/*
-* пример
-* */
-
-let beverage1 = new Espresso();
-beverage1.display();
-beverage1 = new Mocha(beverage1);
-beverage1.display();
-
-beverage1 = new Whip(beverage1);
-beverage1.display();
-
-
-let beverage2 = new DarkRoast();
-beverage2.display();
-
-beverage2 = new Soy(beverage2);
-beverage2.display();
+const order3 = new SimplePizzaFactory().createPizza('cheese');
+console.log('order1 (cheese) is: ', order3);
