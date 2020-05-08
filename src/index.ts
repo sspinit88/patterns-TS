@@ -1,145 +1,174 @@
-/**
-* Интерфейс Абстрактной Фабрики объявляет набор методов, которые возвращают
-* различные абстрактные продукты. Эти продукты называются семейством и связаны
-* темой или концепцией высокого уровня. Продукты одного семейства обычно могут
-* взаимодействовать между собой. Семейство продуктов может иметь несколько
-* вариаций, но продукты одной вариации несовместимы с продуктами другой.
-*/
-interface AbstractFactory {
-  createProductA(): AbstractProductA;
+/*
+* описывем интерфейсы
+* ингредиентов
+* */
 
-  createProductB(): AbstractProductB;
+interface Fake {
+  fakeField: string;
 }
 
-/**
- * Конкретная Фабрика производит семейство продуктов одной вариации. Фабрика
- * гарантирует совместимость полученных продуктов. Обратите внимание, что
- * сигнатуры методов Конкретной Фабрики возвращают абстрактный продукт, в то
- * время как внутри метода создается экземпляр конкретного продукта.
- */
-class ConcreteFactory1 implements AbstractFactory {
-  public createProductA(): AbstractProductA {
-    return new ConcreteProductA1();
-  }
-
-  public createProductB(): AbstractProductB {
-    return new ConcreteProductB1();
-  }
+interface Dough extends Fake {
 }
 
-/**
- * Каждая Конкретная Фабрика имеет соответствующую вариацию продукта.
- */
-class ConcreteFactory2 implements AbstractFactory {
-  public createProductA(): AbstractProductA {
-    return new ConcreteProductA2();
-  }
-
-  public createProductB(): AbstractProductB {
-    return new ConcreteProductB2();
-  }
+interface Sauce extends Fake {
 }
 
-/**
- * Каждый отдельный продукт семейства продуктов должен иметь базовый интерфейс.
- * Все вариации продукта должны реализовывать этот интерфейс.
- */
-interface AbstractProductA {
-  usefulFunctionA(): string;
+interface Veggies extends Fake {
 }
 
-/**
- * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
- */
-class ConcreteProductA1 implements AbstractProductA {
-  public usefulFunctionA(): string {
-    return 'The result of the product A1.';
+interface Cheese extends Fake {
+}
+
+interface Cheese extends Fake {
+}
+
+interface Pepperoni extends Fake {
+}
+
+interface Clam extends Fake {
+}
+
+/*
+* создаем классы ингредиентов,
+* которые будут использоваться
+* при приготовлении пиццы в NY
+* */
+
+class DoughNY implements Dough {
+  fakeField: string = 'Dough';
+}
+
+class SauceNY implements Sauce {
+  fakeField: string = 'Sauce';
+}
+
+class VeggiesNY implements Veggies {
+  fakeField: string = 'Veggies';
+}
+
+class CheeseNY implements Cheese {
+  fakeField: string = 'Cheese';
+}
+
+class PepperoniNY implements Pepperoni {
+  fakeField: string = 'Pepperoni';
+}
+
+class ClamNY implements Clam {
+  fakeField: string = 'Clam';
+}
+
+/*
+* определяем интерфейс фабрики,
+* которая будет создавать все
+* наши ингредиенты
+* */
+
+interface PizzaIngredientFactory {
+  createDough(): Dough;
+
+  createSauce(): Sauce;
+
+  createVeggies(): Veggies[];
+
+  createCheese(): Cheese;
+
+  createPepperoni(): Pepperoni;
+
+  createClam(): Clam
+}
+
+/*
+* абстрактный класс пиццы
+* */
+
+abstract class Pizza {
+
+  /*
+  * каждый объект пиццы содержит набор
+  * ингредиентов, используемых при ее
+  * приготовлении
+  * */
+
+  name: string = 'no data';
+  dough: Dough = { fakeField: 'no data' };
+  sauce: Sauce = { fakeField: 'no data' };
+  veggies: Veggies[] = [];
+  cheese: Cheese = { fakeField: 'no data' };
+  pepperoni: Pepperoni = { fakeField: 'no data' };
+  clam: Clam = { fakeField: 'no data' };
+
+  /*
+  * метод prepare будет собирать ингредиенты, необходимые
+  * для приготовления пиццы, которые будут производится
+  * фабрикой ингредиентов
+  * */
+
+  abstract prepare(): void
+
+  /*
+  * остальные методы остаются неизменными
+  * */
+
+  bake(): void {
+    console.log('Bake for 25 min at 350');
   }
-}
 
-class ConcreteProductA2 implements AbstractProductA {
-  public usefulFunctionA(): string {
-    return 'The result of the product A2.';
-  }
-}
-
-/**
- * Базовый интерфейс другого продукта. Все продукты могут взаимодействовать друг
- * с другом, но правильное взаимодействие возможно только между продуктами одной
- * и той же конкретной вариации.
- */
-interface AbstractProductB {
-  /**
-   * Продукт B способен работать самостоятельно...
-   */
-  usefulFunctionB(): string;
-
-  /**
-   * ...а также взаимодействовать с Продуктами A той же вариации.
-   *
-   * Абстрактная Фабрика гарантирует, что все продукты, которые она создает,
-   * имеют одинаковую вариацию и, следовательно, совместимы.
-   */
-  anotherUsefulFunctionB(collaborator: AbstractProductA): string;
-}
-
-/**
- * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
- */
-class ConcreteProductB1 implements AbstractProductB {
-
-  public usefulFunctionB(): string {
-    return 'The result of the product B1.';
+  cut(): void {
+    console.log('Cutting the pizza into diagonal slices');
   }
 
-  /**
-   * Продукт B1 может корректно работать только с Продуктом A1. Тем не менее,
-   * он принимает любой экземпляр Абстрактного Продукта А в качестве
-   * аргумента.
-   */
-  public anotherUsefulFunctionB(collaborator: AbstractProductA): string {
-    const result = collaborator.usefulFunctionA();
-    return `The result of the B1 collaborating with the (${result})`;
-  }
-}
-
-class ConcreteProductB2 implements AbstractProductB {
-
-  public usefulFunctionB(): string {
-    return 'The result of the product B2.';
+  box(): void {
+    console.log('Place pizza in official PizzaStore box');
   }
 
-  /**
-   * Продукт B2 может корректно работать только с Продуктом A2. Тем не менее,
-   * он принимает любой экземпляр Абстрактного Продукта А в качестве
-   * аргумента.
-   */
-  public anotherUsefulFunctionB(collaborator: AbstractProductA): string {
-    const result = collaborator.usefulFunctionA();
-    return `The result of the B2 collaborating with the (${result})`;
+  setName(n: string): void {
+    this.name = n;
   }
+
+  getName(): string {
+    return this.name;
+  }
+
 }
 
-/**
- * Клиентский код работает с фабриками и продуктами только через абстрактные
- * типы: Абстрактная Фабрика и Абстрактный Продукт. Это позволяет передавать
- * любой подкласс фабрики или продукта клиентскому коду, не нарушая его.
- */
-function clientCode(factory: AbstractFactory) {
-  const productA = factory.createProductA();
-  const productB = factory.createProductB();
+/*
+* NYPizzaIngredientFactory реализует
+* общий интерфейс PizzaIngredientFactory
+* */
 
-  console.log(productB.usefulFunctionB());
-  console.log(productB.anotherUsefulFunctionB(productA));
+class NYPizzaIngredientFactory implements PizzaIngredientFactory {
+
+  /*
+  * для каждого ингредиента
+  * в семействе создается
+  * его версия для NY, для
+  * других городов будет свой
+  * набор ингредиентов
+  * */
+
+  createCheese(): Cheese {
+    return new CheeseNY();
+  }
+
+  createClam(): Clam {
+    return new ClamNY();
+  }
+
+  createDough(): Dough {
+    return new DoughNY();
+  }
+
+  createPepperoni(): Pepperoni {
+    return new PepperoniNY();
+  }
+
+  createSauce(): Sauce {
+    return new SauceNY();
+  }
+
+  createVeggies(): Veggies[] {
+    return [{ fakeField: 'v1' }, { fakeField: 'v2' }];
+  }
+
 }
-
-/**
- * Клиентский код может работать с любым конкретным классом фабрики.
- */
-console.log('Client: Testing client code with the first factory type...');
-clientCode(new ConcreteFactory1());
-
-console.log('');
-
-console.log('Client: Testing the same client code with the second factory type...');
-clientCode(new ConcreteFactory2());
