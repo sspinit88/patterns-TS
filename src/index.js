@@ -1,106 +1,162 @@
-/**
- * Конкретная Фабрика производит семейство продуктов одной вариации. Фабрика
- * гарантирует совместимость полученных продуктов. Обратите внимание, что
- * сигнатуры методов Конкретной Фабрики возвращают абстрактный продукт, в то
- * время как внутри метода создается экземпляр конкретного продукта.
- */
-var ConcreteFactory1 = /** @class */ (function () {
-    function ConcreteFactory1() {
+/*
+* описывем интерфейсы
+* ингредиентов
+* */
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+/*
+* создаем классы ингредиентов,
+* которые будут использоваться
+* при приготовлении пиццы в NY
+* */
+var DoughNY = /** @class */ (function () {
+    function DoughNY() {
+        this.fakeField = 'Dough';
     }
-    ConcreteFactory1.prototype.createProductA = function () {
-        return new ConcreteProductA1();
-    };
-    ConcreteFactory1.prototype.createProductB = function () {
-        return new ConcreteProductB1();
-    };
-    return ConcreteFactory1;
+    return DoughNY;
 }());
-/**
- * Каждая Конкретная Фабрика имеет соответствующую вариацию продукта.
- */
-var ConcreteFactory2 = /** @class */ (function () {
-    function ConcreteFactory2() {
+var SauceNY = /** @class */ (function () {
+    function SauceNY() {
+        this.fakeField = 'Sauce';
     }
-    ConcreteFactory2.prototype.createProductA = function () {
-        return new ConcreteProductA2();
-    };
-    ConcreteFactory2.prototype.createProductB = function () {
-        return new ConcreteProductB2();
-    };
-    return ConcreteFactory2;
+    return SauceNY;
 }());
-/**
- * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
- */
-var ConcreteProductA1 = /** @class */ (function () {
-    function ConcreteProductA1() {
+var VeggiesNY = /** @class */ (function () {
+    function VeggiesNY() {
+        this.fakeField = 'Veggies';
     }
-    ConcreteProductA1.prototype.usefulFunctionA = function () {
-        return 'The result of the product A1.';
-    };
-    return ConcreteProductA1;
+    return VeggiesNY;
 }());
-var ConcreteProductA2 = /** @class */ (function () {
-    function ConcreteProductA2() {
+var CheeseNY = /** @class */ (function () {
+    function CheeseNY() {
+        this.fakeField = 'Cheese';
     }
-    ConcreteProductA2.prototype.usefulFunctionA = function () {
-        return 'The result of the product A2.';
-    };
-    return ConcreteProductA2;
+    return CheeseNY;
 }());
-/**
- * Эти Конкретные Продукты создаются соответствующими Конкретными Фабриками.
- */
-var ConcreteProductB1 = /** @class */ (function () {
-    function ConcreteProductB1() {
+var PepperoniNY = /** @class */ (function () {
+    function PepperoniNY() {
+        this.fakeField = 'Pepperoni';
     }
-    ConcreteProductB1.prototype.usefulFunctionB = function () {
-        return 'The result of the product B1.';
-    };
-    /**
-     * Продукт B1 может корректно работать только с Продуктом A1. Тем не менее,
-     * он принимает любой экземпляр Абстрактного Продукта А в качестве
-     * аргумента.
-     */
-    ConcreteProductB1.prototype.anotherUsefulFunctionB = function (collaborator) {
-        var result = collaborator.usefulFunctionA();
-        return "The result of the B1 collaborating with the (" + result + ")";
-    };
-    return ConcreteProductB1;
+    return PepperoniNY;
 }());
-var ConcreteProductB2 = /** @class */ (function () {
-    function ConcreteProductB2() {
+var ClamNY = /** @class */ (function () {
+    function ClamNY() {
+        this.fakeField = 'Clam';
     }
-    ConcreteProductB2.prototype.usefulFunctionB = function () {
-        return 'The result of the product B2.';
-    };
-    /**
-     * Продукт B2 может корректно работать только с Продуктом A2. Тем не менее,
-     * он принимает любой экземпляр Абстрактного Продукта А в качестве
-     * аргумента.
-     */
-    ConcreteProductB2.prototype.anotherUsefulFunctionB = function (collaborator) {
-        var result = collaborator.usefulFunctionA();
-        return "The result of the B2 collaborating with the (" + result + ")";
-    };
-    return ConcreteProductB2;
+    return ClamNY;
 }());
-/**
- * Клиентский код работает с фабриками и продуктами только через абстрактные
- * типы: Абстрактная Фабрика и Абстрактный Продукт. Это позволяет передавать
- * любой подкласс фабрики или продукта клиентскому коду, не нарушая его.
- */
-function clientCode(factory) {
-    var productA = factory.createProductA();
-    var productB = factory.createProductB();
-    console.log(productB.usefulFunctionB());
-    console.log(productB.anotherUsefulFunctionB(productA));
-}
-/**
- * Клиентский код может работать с любым конкретным классом фабрики.
- */
-console.log('Client: Testing client code with the first factory type...');
-clientCode(new ConcreteFactory1());
-console.log('');
-console.log('Client: Testing the same client code with the second factory type...');
-clientCode(new ConcreteFactory2());
+/*
+* абстрактный класс пиццы
+* */
+var Pizza = /** @class */ (function () {
+    function Pizza() {
+        /*
+        * каждый объект пиццы содержит набор
+        * ингредиентов, используемых при ее
+        * приготовлении
+        * */
+        this.name = 'no data';
+        this.dough = { fakeField: 'no data' };
+        this.sauce = { fakeField: 'no data' };
+        this.veggies = [];
+        this.cheese = { fakeField: 'no data' };
+        this.pepperoni = { fakeField: 'no data' };
+        this.clam = { fakeField: 'no data' };
+    }
+    /*
+    * остальные методы остаются неизменными
+    * */
+    Pizza.prototype.bake = function () {
+        console.log('Bake for 25 min at 350');
+    };
+    Pizza.prototype.cut = function () {
+        console.log('Cutting the pizza into diagonal slices');
+    };
+    Pizza.prototype.box = function () {
+        console.log('Place pizza in official PizzaStore box');
+    };
+    Pizza.prototype.setName = function (n) {
+        this.name = n;
+    };
+    Pizza.prototype.getName = function () {
+        console.log("Pizza's name: " + this.name);
+        return this.name;
+    };
+    return Pizza;
+}());
+/*
+* NYPizzaIngredientFactory реализует
+* общий интерфейс PizzaIngredientFactory
+* */
+var NYPizzaIngredientFactory = /** @class */ (function () {
+    function NYPizzaIngredientFactory() {
+    }
+    /*
+    * для каждого ингредиента
+    * в семействе создается
+    * его версия для NY, для
+    * других городов будет свой
+    * набор ингредиентов
+    * */
+    NYPizzaIngredientFactory.prototype.createCheese = function () {
+        return new CheeseNY();
+    };
+    NYPizzaIngredientFactory.prototype.createClam = function () {
+        return new ClamNY();
+    };
+    NYPizzaIngredientFactory.prototype.createDough = function () {
+        return new DoughNY();
+    };
+    NYPizzaIngredientFactory.prototype.createPepperoni = function () {
+        return new PepperoniNY();
+    };
+    NYPizzaIngredientFactory.prototype.createSauce = function () {
+        return new SauceNY();
+    };
+    NYPizzaIngredientFactory.prototype.createVeggies = function () {
+        return [{ fakeField: 'v1' }, { fakeField: 'v2' }];
+    };
+    return NYPizzaIngredientFactory;
+}());
+/*
+*
+* */
+var CheesePizza = /** @class */ (function (_super) {
+    __extends(CheesePizza, _super);
+    function CheesePizza(ingredientFactory) {
+        var _this = _super.call(this) || this;
+        _this.ingredientFactory = ingredientFactory;
+        return _this;
+    }
+    /*
+    * prepare() - готовит пиццу с сыром. Когда ему требуется
+    * очередной ингредиент, он запрашивает его у фабрики
+    * */
+    CheesePizza.prototype.prepare = function () {
+        this.dough = this.ingredientFactory.createDough();
+        this.sauce = this.ingredientFactory.createSauce();
+        this.cheese = this.ingredientFactory.createCheese();
+    };
+    return CheesePizza;
+}(Pizza));
+/*
+* пример:
+* */
+var NYCheesePizza = new CheesePizza(new NYPizzaIngredientFactory());
+NYCheesePizza.prepare();
+NYCheesePizza.bake();
+NYCheesePizza.cut();
+NYCheesePizza.box();
+NYCheesePizza.setName('NYCheesePizza');
+NYCheesePizza.getName();

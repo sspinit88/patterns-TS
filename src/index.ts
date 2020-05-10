@@ -127,6 +127,7 @@ abstract class Pizza {
   }
 
   getName(): string {
+    console.log(`Pizza's name: ${this.name}`);
     return this.name;
   }
 
@@ -172,3 +173,42 @@ class NYPizzaIngredientFactory implements PizzaIngredientFactory {
   }
 
 }
+
+/*
+*
+* */
+
+class CheesePizza extends Pizza {
+
+  ingredientFactory: PizzaIngredientFactory;
+
+  constructor(ingredientFactory: PizzaIngredientFactory) {
+    super();
+    this.ingredientFactory = ingredientFactory;
+  }
+
+  /*
+  * prepare() - готовит пиццу с сыром. Когда ему требуется
+  * очередной ингредиент, он запрашивает его у фабрики
+  * */
+  prepare(): void {
+    this.dough = this.ingredientFactory.createDough();
+    this.sauce = this.ingredientFactory.createSauce();
+    this.cheese = this.ingredientFactory.createCheese();
+  }
+
+}
+
+/*
+* пример:
+* */
+
+const NYCheesePizza = new CheesePizza(new NYPizzaIngredientFactory());
+NYCheesePizza.prepare();
+NYCheesePizza.bake();
+NYCheesePizza.cut();
+NYCheesePizza.box();
+NYCheesePizza.setName('NYCheesePizza');
+NYCheesePizza.getName();
+
+
