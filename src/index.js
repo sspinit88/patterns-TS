@@ -1,162 +1,101 @@
 /*
-* описывем интерфейсы
-* ингредиентов
+* Паттерн можно часто встретить,
+* особенно когда нужно откладывать выполнение команд,
+* выстраивать их в очереди, а также хранить историю и делать отмену.
 * */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-/*
-* создаем классы ингредиентов,
-* которые будут использоваться
-* при приготовлении пиццы в NY
-* */
-var DoughNY = /** @class */ (function () {
-    function DoughNY() {
-        this.fakeField = 'Dough';
+/**
+ * Некоторые команды способны выполнять простые операции самостоятельно.
+ */
+var SimpleCommand = /** @class */ (function () {
+    function SimpleCommand(payload) {
+        this.payload = payload;
     }
-    return DoughNY;
+    SimpleCommand.prototype.execute = function () {
+        console.log("SimpleCommand: See, I can do simple things like printing (" + this.payload + ")");
+    };
+    return SimpleCommand;
 }());
-var SauceNY = /** @class */ (function () {
-    function SauceNY() {
-        this.fakeField = 'Sauce';
+/**
+ * Но есть и команды, которые делегируют более сложные операции другим объектам,
+ * называемым «получателями».
+ */
+var ComplexCommand = /** @class */ (function () {
+    /**
+     * Сложные команды могут принимать один или несколько объектов-получателей
+     * вместе с любыми данными о контексте через конструктор.
+     */
+    function ComplexCommand(receiver, a, b) {
+        this.receiver = receiver;
+        this.a = a;
+        this.b = b;
     }
-    return SauceNY;
+    /**
+     * Команды могут делегировать выполнение любым методам получателя.
+     */
+    ComplexCommand.prototype.execute = function () {
+        console.log('ComplexCommand: Complex stuff should be done by a receiver object.');
+        this.receiver.doSomething(this.a);
+        this.receiver.doSomethingElse(this.b);
+    };
+    return ComplexCommand;
 }());
-var VeggiesNY = /** @class */ (function () {
-    function VeggiesNY() {
-        this.fakeField = 'Veggies';
+/**
+ * Классы Получателей содержат некую важную бизнес-логику. Они умеют выполнять
+ * все виды операций, связанных с выполнением запроса. Фактически, любой класс
+ * может выступать Получателем.
+ */
+var Receiver = /** @class */ (function () {
+    function Receiver() {
     }
-    return VeggiesNY;
+    Receiver.prototype.doSomething = function (a) {
+        console.log("Receiver: Working on (" + a + ".)");
+    };
+    Receiver.prototype.doSomethingElse = function (b) {
+        console.log("Receiver: Also working on (" + b + ".)");
+    };
+    return Receiver;
 }());
-var CheeseNY = /** @class */ (function () {
-    function CheeseNY() {
-        this.fakeField = 'Cheese';
+/**
+ * Отправитель связан с одной или несколькими командами. Он отправляет запрос
+ * команде.
+ */
+var Invoker = /** @class */ (function () {
+    function Invoker() {
     }
-    return CheeseNY;
+    /**
+     * Инициализация команд.
+     */
+    Invoker.prototype.setOnStart = function (command) {
+        this.onStart = command;
+    };
+    Invoker.prototype.setOnFinish = function (command) {
+        this.onFinish = command;
+    };
+    /**
+     * Отправитель не зависит от классов конкретных команд и получателей.
+     * Отправитель передаёт запрос получателю косвенно, выполняя команду.
+     */
+    Invoker.prototype.doSomethingImportant = function () {
+        console.log('Invoker: Does anybody want something done before I begin?');
+        if (this.isCommand(this.onStart)) {
+            this.onStart.execute();
+        }
+        console.log('Invoker: ...doing something really important...');
+        console.log('Invoker: Does anybody want something done after I finish?');
+        if (this.isCommand(this.onFinish)) {
+            this.onFinish.execute();
+        }
+    };
+    Invoker.prototype.isCommand = function (object) {
+        return object.execute !== undefined;
+    };
+    return Invoker;
 }());
-var PepperoniNY = /** @class */ (function () {
-    function PepperoniNY() {
-        this.fakeField = 'Pepperoni';
-    }
-    return PepperoniNY;
-}());
-var ClamNY = /** @class */ (function () {
-    function ClamNY() {
-        this.fakeField = 'Clam';
-    }
-    return ClamNY;
-}());
-/*
-* абстрактный класс пиццы
-* */
-var Pizza = /** @class */ (function () {
-    function Pizza() {
-        /*
-        * каждый объект пиццы содержит набор
-        * ингредиентов, используемых при ее
-        * приготовлении
-        * */
-        this.name = 'no data';
-        this.dough = { fakeField: 'no data' };
-        this.sauce = { fakeField: 'no data' };
-        this.veggies = [];
-        this.cheese = { fakeField: 'no data' };
-        this.pepperoni = { fakeField: 'no data' };
-        this.clam = { fakeField: 'no data' };
-    }
-    /*
-    * остальные методы остаются неизменными
-    * */
-    Pizza.prototype.bake = function () {
-        console.log('Bake for 25 min at 350');
-    };
-    Pizza.prototype.cut = function () {
-        console.log('Cutting the pizza into diagonal slices');
-    };
-    Pizza.prototype.box = function () {
-        console.log('Place pizza in official PizzaStore box');
-    };
-    Pizza.prototype.setName = function (n) {
-        this.name = n;
-    };
-    Pizza.prototype.getName = function () {
-        console.log("Pizza's name: " + this.name);
-        return this.name;
-    };
-    return Pizza;
-}());
-/*
-* NYPizzaIngredientFactory реализует
-* общий интерфейс PizzaIngredientFactory
-* */
-var NYPizzaIngredientFactory = /** @class */ (function () {
-    function NYPizzaIngredientFactory() {
-    }
-    /*
-    * для каждого ингредиента
-    * в семействе создается
-    * его версия для NY, для
-    * других городов будет свой
-    * набор ингредиентов
-    * */
-    NYPizzaIngredientFactory.prototype.createCheese = function () {
-        return new CheeseNY();
-    };
-    NYPizzaIngredientFactory.prototype.createClam = function () {
-        return new ClamNY();
-    };
-    NYPizzaIngredientFactory.prototype.createDough = function () {
-        return new DoughNY();
-    };
-    NYPizzaIngredientFactory.prototype.createPepperoni = function () {
-        return new PepperoniNY();
-    };
-    NYPizzaIngredientFactory.prototype.createSauce = function () {
-        return new SauceNY();
-    };
-    NYPizzaIngredientFactory.prototype.createVeggies = function () {
-        return [{ fakeField: 'v1' }, { fakeField: 'v2' }];
-    };
-    return NYPizzaIngredientFactory;
-}());
-/*
-*
-* */
-var CheesePizza = /** @class */ (function (_super) {
-    __extends(CheesePizza, _super);
-    function CheesePizza(ingredientFactory) {
-        var _this = _super.call(this) || this;
-        _this.ingredientFactory = ingredientFactory;
-        return _this;
-    }
-    /*
-    * prepare() - готовит пиццу с сыром. Когда ему требуется
-    * очередной ингредиент, он запрашивает его у фабрики
-    * */
-    CheesePizza.prototype.prepare = function () {
-        this.dough = this.ingredientFactory.createDough();
-        this.sauce = this.ingredientFactory.createSauce();
-        this.cheese = this.ingredientFactory.createCheese();
-    };
-    return CheesePizza;
-}(Pizza));
-/*
-* пример:
-* */
-var NYCheesePizza = new CheesePizza(new NYPizzaIngredientFactory());
-NYCheesePizza.prepare();
-NYCheesePizza.bake();
-NYCheesePizza.cut();
-NYCheesePizza.box();
-NYCheesePizza.setName('NYCheesePizza');
-NYCheesePizza.getName();
+/**
+ * Клиентский код может параметризовать отправителя любыми командами.
+ */
+var invoker = new Invoker();
+invoker.setOnStart(new SimpleCommand('Say Hi!'));
+var receiver = new Receiver();
+invoker.setOnFinish(new ComplexCommand(receiver, 'Send email', 'Save report'));
+invoker.doSomethingImportant();
