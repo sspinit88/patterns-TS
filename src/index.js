@@ -1,101 +1,65 @@
 /*
-* Паттерн можно часто встретить,
-* особенно когда нужно откладывать выполнение команд,
-* выстраивать их в очереди, а также хранить историю и делать отмену.
+*  Утка может крякать и летать.
 * */
-/**
- * Некоторые команды способны выполнять простые операции самостоятельно.
- */
-var SimpleCommand = /** @class */ (function () {
-    function SimpleCommand(payload) {
-        this.payload = payload;
+/*
+* создаем класс утки и индюшки
+* */
+var MallardDuck = /** @class */ (function () {
+    function MallardDuck() {
     }
-    SimpleCommand.prototype.execute = function () {
-        console.log("SimpleCommand: See, I can do simple things like printing (" + this.payload + ")");
+    MallardDuck.prototype.fly = function () {
+        console.log("I'm MallardDuck and I flying!");
     };
-    return SimpleCommand;
+    MallardDuck.prototype.quack = function () {
+        console.log("\u041A\u0440\u044F-\u043A\u0440\u044F-\u043A\u0440\u044F");
+    };
+    return MallardDuck;
 }());
-/**
- * Но есть и команды, которые делегируют более сложные операции другим объектам,
- * называемым «получателями».
- */
-var ComplexCommand = /** @class */ (function () {
-    /**
-     * Сложные команды могут принимать один или несколько объектов-получателей
-     * вместе с любыми данными о контексте через конструктор.
-     */
-    function ComplexCommand(receiver, a, b) {
-        this.receiver = receiver;
-        this.a = a;
-        this.b = b;
+var WildTurkey = /** @class */ (function () {
+    function WildTurkey() {
     }
-    /**
-     * Команды могут делегировать выполнение любым методам получателя.
-     */
-    ComplexCommand.prototype.execute = function () {
-        console.log('ComplexCommand: Complex stuff should be done by a receiver object.');
-        this.receiver.doSomething(this.a);
-        this.receiver.doSomethingElse(this.b);
+    WildTurkey.prototype.fly = function () {
+        console.log("I'm WildTurkey and I can fly not very well.");
     };
-    return ComplexCommand;
+    WildTurkey.prototype.gobble = function () {
+        console.log("\u041A\u0445\u043C..., \u0433\u0443-\u0433\u0443-\u043B\u0435-\u0433\u0443-\u0433\u0443-\u043B\u0435!");
+    };
+    return WildTurkey;
 }());
-/**
- * Классы Получателей содержат некую важную бизнес-логику. Они умеют выполнять
- * все виды операций, связанных с выполнением запроса. Фактически, любой класс
- * может выступать Получателем.
- */
-var Receiver = /** @class */ (function () {
-    function Receiver() {
+/*
+* создаем адаптер
+* */
+var TurkeyAdapter = /** @class */ (function () {
+    function TurkeyAdapter(t) {
+        this.turkey = t;
     }
-    Receiver.prototype.doSomething = function (a) {
-        console.log("Receiver: Working on (" + a + ".)");
-    };
-    Receiver.prototype.doSomethingElse = function (b) {
-        console.log("Receiver: Also working on (" + b + ".)");
-    };
-    return Receiver;
-}());
-/**
- * Отправитель связан с одной или несколькими командами. Он отправляет запрос
- * команде.
- */
-var Invoker = /** @class */ (function () {
-    function Invoker() {
-    }
-    /**
-     * Инициализация команд.
-     */
-    Invoker.prototype.setOnStart = function (command) {
-        this.onStart = command;
-    };
-    Invoker.prototype.setOnFinish = function (command) {
-        this.onFinish = command;
-    };
-    /**
-     * Отправитель не зависит от классов конкретных команд и получателей.
-     * Отправитель передаёт запрос получателю косвенно, выполняя команду.
-     */
-    Invoker.prototype.doSomethingImportant = function () {
-        console.log('Invoker: Does anybody want something done before I begin?');
-        if (this.isCommand(this.onStart)) {
-            this.onStart.execute();
-        }
-        console.log('Invoker: ...doing something really important...');
-        console.log('Invoker: Does anybody want something done after I finish?');
-        if (this.isCommand(this.onFinish)) {
-            this.onFinish.execute();
+    TurkeyAdapter.prototype.fly = function () {
+        for (var i = 0; i < 5; i++) {
+            this.turkey.fly();
         }
     };
-    Invoker.prototype.isCommand = function (object) {
-        return object.execute !== undefined;
+    TurkeyAdapter.prototype.quack = function () {
+        this.turkey.gobble();
     };
-    return Invoker;
+    return TurkeyAdapter;
 }());
-/**
- * Клиентский код может параметризовать отправителя любыми командами.
- */
-var invoker = new Invoker();
-invoker.setOnStart(new SimpleCommand('Say Hi!'));
-var receiver = new Receiver();
-invoker.setOnFinish(new ComplexCommand(receiver, 'Send email', 'Save report'));
-invoker.doSomethingImportant();
+/*
+* пример
+* */
+var DuckTestDrive = /** @class */ (function () {
+    function DuckTestDrive() {
+    }
+    DuckTestDrive.prototype.main = function () {
+        var duck = new MallardDuck();
+        var turkey = new WildTurkey();
+        var turkeyAdapter = new TurkeyAdapter(turkey);
+        this.testDuck(duck);
+        this.testDuck(turkeyAdapter);
+    };
+    DuckTestDrive.prototype.testDuck = function (duck) {
+        duck.fly();
+        duck.quack();
+    };
+    return DuckTestDrive;
+}());
+new DuckTestDrive().main();

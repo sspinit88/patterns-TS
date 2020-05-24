@@ -1,130 +1,96 @@
 /*
-* Паттерн можно часто встретить,
-* особенно когда нужно откладывать выполнение команд,
-* выстраивать их в очереди, а также хранить историю и делать отмену.
+* Паттерн Адаптер преобразует интерфейс класса к другому интерфейсуб на который рссчитан клиент.
+* Адаптер обеспечивает совместную работу классов, невозможную в обычных условиях из-за несовместимости интерфейсов.
 * */
 
 
-/**
- * Интерфейс Команды объявляет метод для выполнения команд.
- */
-interface Command {
-  execute(): void;
+/*
+*  Утка может крякать и летать.
+* */
+
+interface Duck {
+  quack(): void;
+
+  fly(): void;
 }
 
-/**
- * Некоторые команды способны выполнять простые операции самостоятельно.
- */
-class SimpleCommand implements Command {
-  private payload: string;
+/*
+* Индюшка может летать, но не умеет крякать
+* */
 
-  constructor(payload: string) {
-    this.payload = payload;
-  }
+interface Turkey {
+  gobble(): void;
 
-  public execute(): void {
-    console.log(`SimpleCommand: See, I can do simple things like printing (${this.payload})`);
-  }
+  fly(): void;
 }
 
-/**
- * Но есть и команды, которые делегируют более сложные операции другим объектам,
- * называемым «получателями».
- */
-class ComplexCommand implements Command {
-  private receiver: Receiver;
+/*
+* создаем класс утки и индюшки
+* */
 
-  /**
-   * Данные о контексте, необходимые для запуска методов получателя.
-   */
-  private a: string;
-
-  private b: string;
-
-  /**
-   * Сложные команды могут принимать один или несколько объектов-получателей
-   * вместе с любыми данными о контексте через конструктор.
-   */
-  constructor(receiver: Receiver, a: string, b: string) {
-    this.receiver = receiver;
-    this.a = a;
-    this.b = b;
+class MallardDuck implements Duck {
+  fly(): void {
+    console.log(`I'm MallardDuck and I flying!`);
   }
 
-  /**
-   * Команды могут делегировать выполнение любым методам получателя.
-   */
-  public execute(): void {
-    console.log('ComplexCommand: Complex stuff should be done by a receiver object.');
-    this.receiver.doSomething(this.a);
-    this.receiver.doSomethingElse(this.b);
+  quack(): void {
+    console.log(`Кря-кря-кря`);
   }
 }
 
-/**
- * Классы Получателей содержат некую важную бизнес-логику.
- * Они умеют выполнять все виды операций, связанных с выполнением запроса.
- * Фактически, любой класс может выступать Получателем.
- */
-class Receiver {
-  public doSomething(a: string): void {
-    console.log(`Receiver: Working on (${a}.)`);
+class WildTurkey implements Turkey {
+  fly(): void {
+    console.log(`I'm WildTurkey and I can fly not very well.`);
   }
 
-  public doSomethingElse(b: string): void {
-    console.log(`Receiver: Also working on (${b}.)`);
+  gobble(): void {
+    console.log(`Кхм..., гу-гу-ле-гу-гу-ле!`);
   }
 }
 
-/**
- * Отправитель связан с одной или несколькими командами.
- * Он отправляет запрос команде.
- */
-class Invoker {
-  private onStart: Command;
+/*
+* создаем адаптер
+* */
 
-  private onFinish: Command;
+class TurkeyAdapter implements Duck {
 
-  /**
-   * Инициализация команд.
-   */
-  public setOnStart(command: Command): void {
-    this.onStart = command;
+  turkey: Turkey;
+
+  constructor(t: Turkey) {
+    this.turkey = t;
   }
 
-  public setOnFinish(command: Command): void {
-    this.onFinish = command;
-  }
-
-  /**
-   * Отправитель не зависит от классов конкретных команд и получателей.
-   * Отправитель передаёт запрос получателю косвенно, выполняя команду.
-   */
-  public doSomethingImportant(): void {
-    console.log('Invoker: Does anybody want something done before I begin?');
-    if (this.isCommand(this.onStart)) {
-      this.onStart.execute();
-    }
-
-    console.log('Invoker: ...doing something really important...');
-
-    console.log('Invoker: Does anybody want something done after I finish?');
-    if (this.isCommand(this.onFinish)) {
-      this.onFinish.execute();
+  fly(): void {
+    for (let i = 0; i < 5; i++) {
+      this.turkey.fly();
     }
   }
 
-  private isCommand(object): object is Command {
-    return object.execute !== undefined;
+  quack(): void {
+    this.turkey.gobble();
   }
 }
 
-/**
- * Клиентский код может параметризовать отправителя любыми командами.
- */
-const invoker = new Invoker();
-invoker.setOnStart(new SimpleCommand('Say Hi!'));
-const receiver = new Receiver();
-invoker.setOnFinish(new ComplexCommand(receiver, 'Send email', 'Save report'));
+/*
+* пример
+* */
 
-invoker.doSomethingImportant();
+class DuckTestDrive {
+  main(): void {
+    const duck: Duck = new MallardDuck();
+
+    const turkey: Turkey = new WildTurkey();
+
+    const turkeyAdapter: Duck = new TurkeyAdapter(turkey);
+
+    this.testDuck(duck);
+    this.testDuck(turkeyAdapter);
+  }
+
+  testDuck(duck: Duck): void {
+    duck.fly();
+    duck.quack();
+  }
+}
+
+new DuckTestDrive().main();
