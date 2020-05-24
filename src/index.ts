@@ -142,7 +142,7 @@ class Soy extends CondimentDecorator {
   }
 
   getDescription(): string {
-    return `${super.getDescription()}, Soy`;
+    return `${this.beverage.getDescription()}, Soy`;
   }
 
   cost(): number {
@@ -150,7 +150,7 @@ class Soy extends CondimentDecorator {
   }
 
   display(): void {
-    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
   }
 }
 
@@ -163,12 +163,16 @@ class Whip extends CondimentDecorator {
     this.beverage = beverage;
   }
 
+  getDescription(): string {
+    return `${this.beverage.getDescription()}, Whip`;
+  }
+
   cost(): number {
     return this.beverage.cost() + this.price;
   }
 
   display(): void {
-    console.log(`${this.beverage.getDescription()}, cost: ${this.cost()}$`);
+    console.log(`${this.getDescription()}, cost: ${this.cost()}$`);
   }
 }
 
@@ -180,10 +184,8 @@ let beverage1 = new Espresso();
 beverage1.display();
 beverage1 = new Mocha(beverage1);
 beverage1.display();
-
 beverage1 = new Whip(beverage1);
 beverage1.display();
-
 
 let beverage2 = new DarkRoast();
 beverage2.display();

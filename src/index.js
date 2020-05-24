@@ -1,3 +1,6 @@
+/*
+* Описываем интерфейс напитков
+* */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -11,6 +14,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+/*
+* Класс декоратора
+* */
 var CondimentDecorator = /** @class */ (function () {
     function CondimentDecorator() {
         this.description = 'Unknown Beverage';
@@ -124,13 +130,13 @@ var Soy = /** @class */ (function (_super) {
         return _this;
     }
     Soy.prototype.getDescription = function () {
-        return _super.prototype.getDescription.call(this) + ", Soy";
+        return this.beverage.getDescription() + ", Soy";
     };
     Soy.prototype.cost = function () {
         return this.beverage.cost() + this.price;
     };
     Soy.prototype.display = function () {
-        console.log(this.beverage.getDescription() + ", cost: " + this.cost() + "$");
+        console.log(this.getDescription() + ", cost: " + this.cost() + "$");
     };
     return Soy;
 }(CondimentDecorator));
@@ -142,11 +148,14 @@ var Whip = /** @class */ (function (_super) {
         _this.beverage = beverage;
         return _this;
     }
+    Whip.prototype.getDescription = function () {
+        return this.beverage.getDescription() + ", Whip";
+    };
     Whip.prototype.cost = function () {
         return this.beverage.cost() + this.price;
     };
     Whip.prototype.display = function () {
-        console.log(this.beverage.getDescription() + ", cost: " + this.cost() + "$");
+        console.log(this.getDescription() + ", cost: " + this.cost() + "$");
     };
     return Whip;
 }(CondimentDecorator));
