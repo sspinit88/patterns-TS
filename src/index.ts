@@ -1,100 +1,146 @@
 /*
-* интерфейс стратегии
+* Применимость: Паттерн можно часто встретить в TypeScript-коде,
+* особенно в программах, работающих с разными типами коллекций, и где требуется обход разных сущностей.
+* Признаки применения паттерна: Итератор легко определить по методам навигации (например, получения следующего/предыдущего элемента и т. д.).
+* Код использующий итератор зачастую вообще не имеет ссылок на коллекцию, с которой работает итератор.
+* Итератор либо принимает коллекцию в параметрах конструкторе при создании, либо возвращается самой коллекцией.
 * */
-interface FlyBehavior {
-  fly(): void;
+
+/**
+ * Паттерн Итератор
+ *
+ * Назначение: Даёт возможность последовательно обходить элементы составных
+ * объектов, не раскрывая их внутреннего представления.
+ */
+
+interface Iterator<T> {
+  // Возврат текущего элемента.
+  current(): T;
+
+  // Возврат текущего элемента и переход к следующему элементу.
+  next(): T;
+
+  // Возврат ключа текущего элемента.
+  key(): number;
+
+  // Проверяет корректность текущей позиции.
+  valid(): boolean;
+
+  // Перемотка Итератора к первому элементу.
+  rewind(): void;
 }
 
-/*
-* интерфейс стратегии
-* */
-interface QuackBehavior {
-  quack(): void;
+interface Aggregator {
+  // Получить внешний итератор.
+  getIterator(): Iterator<string>;
 }
 
-/*
- * Класс - контекст определяет интерфейс, представляющий интерес для клиентов.
- * */
-class Duck {
-  flyBehavior: FlyBehavior;
-  quackBehavior: QuackBehavior;
+/**
+ * Конкретные Итераторы реализуют различные алгоритмы обхода. Эти классы
+ * постоянно хранят текущее положение обхода.
+ */
 
-  constructor(
-    flyBehavior: FlyBehavior,
-    quackBehavior: QuackBehavior,
-  ) {
-    this.flyBehavior = flyBehavior;
-    this.quackBehavior = quackBehavior;
-  }
-
-  display(): void {
-
-  }
+class AlphabeticalOrderIterator implements Iterator<string> {
+  private collection: WordsCollection;
 
   /**
-   * Обычно Контекст позволяет заменить объект Стратегии во время выполнения.
+   * Хранит текущее положение обхода. У итератора может быть множество других
+   * полей для хранения состояния итерации, особенно когда он должен работать
+   * с определённым типом коллекции.
    */
-  public setFlyBehavior(fb: FlyBehavior): void {
-    this.flyBehavior = fb;
+  private position: number = 0;
+
+  /**
+   * Эта переменная указывает направление обхода.
+   */
+  private reverse: boolean = false;
+
+  constructor(collection: WordsCollection, reverse: boolean = false) {
+    this.collection = collection;
+    this.reverse = reverse;
+
+    if (reverse) {
+      this.position = collection.getCount() - 1;
+    }
   }
 
-  public setQuackBehavior(fb: QuackBehavior): void {
-    this.quackBehavior = fb;
+  public rewind() {
+    this.position = this.reverse ?
+      this.collection.getCount() - 1 :
+      0;
   }
 
-  performFly(): void {
-    this.flyBehavior.fly();
+  public current(): string {
+    return this.collection.getItems()[this.position];
   }
 
-  performQuack(): void {
-    this.quackBehavior.quack();
+  public key(): number {
+    return this.position;
   }
-}
 
-/*
-* FlyWithWings, FlyNoWay, Quack, MuteQuack - сами стратегии
-* */
-class FlyWithWings implements FlyBehavior {
-  fly(): void {
-    console.log('Fly!');
+  public next(): string {
+    const item = this.collection.getItems()[this.position];
+    this.position += this.reverse ? -1 : 1;
+    return item;
   }
-}
 
-class FlyNoWay implements FlyBehavior {
-  fly(): void {
-    console.log('I can\'t fly!');
-  }
-}
+  public valid(): boolean {
+    if (this.reverse) {
+      return this.position >= 0;
+    }
 
-class Quack implements QuackBehavior {
-  quack(): void {
-    console.log('Quack!');
-  }
-}
-
-class MuteQuack implements QuackBehavior {
-  quack(): void {
-    console.log('<< Silence >>');
-  }
-}
-
-// пример
-
-class ModelDuck extends Duck {
-  display(): void {
-    console.log('Это - ModelDuck');
+    return this.position < this.collection.getCount();
   }
 }
 
-const model = new ModelDuck(new FlyNoWay(), new Quack());
-model.performFly();
-model.performQuack();
+/**
+ * Конкретные Коллекции предоставляют один или несколько методов для получения
+ * новых экземпляров итератора, совместимых с классом коллекции.
+ */
+class WordsCollection implements Aggregator {
+  private items: string[] = [];
 
-model.setFlyBehavior(new FlyWithWings());
-model.setQuackBehavior(new MuteQuack());
+  public getItems(): string[] {
+    return this.items;
+  }
 
-model.performFly();
-model.performQuack();
+  public getCount(): number {
+    return this.items.length;
+  }
 
-model.display();
+  public addItem(item: string): void {
+    this.items.push(item);
+  }
 
+  public getIterator(): Iterator<string> {
+    return new AlphabeticalOrderIterator(this);
+  }
+
+  public getReverseIterator(): Iterator<string> {
+    return new AlphabeticalOrderIterator(this, true);
+  }
+}
+
+/**
+ * Клиентский код может знать или не знать о Конкретном Итераторе или классах
+ * Коллекций, в зависимости от уровня косвенности, который вы хотите сохранить в
+ * своей программе.
+ */
+const collection = new WordsCollection();
+collection.addItem('First');
+collection.addItem('Second');
+collection.addItem('Third');
+
+const iterator = collection.getIterator();
+
+console.log('Straight traversal:');
+while (iterator.valid()) {
+  console.log(iterator.next());
+}
+
+console.log('');
+console.log('Reverse traversal:');
+const reverseIterator = collection.getReverseIterator();
+while (reverseIterator.valid()) {
+  console.log(reverseIterator.next());
+}

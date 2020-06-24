@@ -1,94 +1,99 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 /*
- * Класс - контекст определяет интерфейс, представляющий интерес для клиентов.
- * */
-var Duck = /** @class */ (function () {
-    function Duck(flyBehavior, quackBehavior) {
-        this.flyBehavior = flyBehavior;
-        this.quackBehavior = quackBehavior;
-    }
-    Duck.prototype.display = function () {
-    };
-    /**
-     * Обычно Контекст позволяет заменить объект Стратегии во время выполнения.
-     */
-    Duck.prototype.setFlyBehavior = function (fb) {
-        this.flyBehavior = fb;
-    };
-    Duck.prototype.setQuackBehavior = function (fb) {
-        this.quackBehavior = fb;
-    };
-    Duck.prototype.performFly = function () {
-        this.flyBehavior.fly();
-    };
-    Duck.prototype.performQuack = function () {
-        this.quackBehavior.quack();
-    };
-    return Duck;
-}());
-/*
-* FlyWithWings, FlyNoWay, Quack, MuteQuack - сами стратегии
+* Применимость: Паттерн можно часто встретить в TypeScript-коде,
+* особенно в программах, работающих с разными типами коллекций, и где требуется обход разных сущностей.
+* Признаки применения паттерна: Итератор легко определить по методам навигации (например, получения следующего/предыдущего элемента и т. д.).
+* Код использующий итератор зачастую вообще не имеет ссылок на коллекцию, с которой работает итератор.
+* Итератор либо принимает коллекцию в параметрах конструкторе при создании, либо возвращается самой коллекцией.
 * */
-var FlyWithWings = /** @class */ (function () {
-    function FlyWithWings() {
+/**
+ * Конкретные Итераторы реализуют различные алгоритмы обхода. Эти классы
+ * постоянно хранят текущее положение обхода.
+ */
+var AlphabeticalOrderIterator = /** @class */ (function () {
+    function AlphabeticalOrderIterator(collection, reverse) {
+        if (reverse === void 0) { reverse = false; }
+        /**
+         * Хранит текущее положение обхода. У итератора может быть множество других
+         * полей для хранения состояния итерации, особенно когда он должен работать
+         * с определённым типом коллекции.
+         */
+        this.position = 0;
+        /**
+         * Эта переменная указывает направление обхода.
+         */
+        this.reverse = false;
+        this.collection = collection;
+        this.reverse = reverse;
+        if (reverse) {
+            this.position = collection.getCount() - 1;
+        }
     }
-    FlyWithWings.prototype.fly = function () {
-        console.log('Fly!');
+    AlphabeticalOrderIterator.prototype.rewind = function () {
+        this.position = this.reverse ?
+            this.collection.getCount() - 1 :
+            0;
     };
-    return FlyWithWings;
+    AlphabeticalOrderIterator.prototype.current = function () {
+        return this.collection.getItems()[this.position];
+    };
+    AlphabeticalOrderIterator.prototype.key = function () {
+        return this.position;
+    };
+    AlphabeticalOrderIterator.prototype.next = function () {
+        var item = this.collection.getItems()[this.position];
+        this.position += this.reverse ? -1 : 1;
+        return item;
+    };
+    AlphabeticalOrderIterator.prototype.valid = function () {
+        if (this.reverse) {
+            return this.position >= 0;
+        }
+        return this.position < this.collection.getCount();
+    };
+    return AlphabeticalOrderIterator;
 }());
-var FlyNoWay = /** @class */ (function () {
-    function FlyNoWay() {
+/**
+ * Конкретные Коллекции предоставляют один или несколько методов для получения
+ * новых экземпляров итератора, совместимых с классом коллекции.
+ */
+var WordsCollection = /** @class */ (function () {
+    function WordsCollection() {
+        this.items = [];
     }
-    FlyNoWay.prototype.fly = function () {
-        console.log('I can\'t fly!');
+    WordsCollection.prototype.getItems = function () {
+        return this.items;
     };
-    return FlyNoWay;
+    WordsCollection.prototype.getCount = function () {
+        return this.items.length;
+    };
+    WordsCollection.prototype.addItem = function (item) {
+        this.items.push(item);
+    };
+    WordsCollection.prototype.getIterator = function () {
+        return new AlphabeticalOrderIterator(this);
+    };
+    WordsCollection.prototype.getReverseIterator = function () {
+        return new AlphabeticalOrderIterator(this, true);
+    };
+    return WordsCollection;
 }());
-var Quack = /** @class */ (function () {
-    function Quack() {
-    }
-    Quack.prototype.quack = function () {
-        console.log('Quack!');
-    };
-    return Quack;
-}());
-var MuteQuack = /** @class */ (function () {
-    function MuteQuack() {
-    }
-    MuteQuack.prototype.quack = function () {
-        console.log('<< Silence >>');
-    };
-    return MuteQuack;
-}());
-// пример
-var ModelDuck = /** @class */ (function (_super) {
-    __extends(ModelDuck, _super);
-    function ModelDuck() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    ModelDuck.prototype.display = function () {
-        console.log('Это - ModelDuck');
-    };
-    return ModelDuck;
-}(Duck));
-var model = new ModelDuck(new FlyNoWay(), new Quack());
-model.performFly();
-model.performQuack();
-model.setFlyBehavior(new FlyWithWings());
-model.setQuackBehavior(new MuteQuack());
-model.performFly();
-model.performQuack();
-model.display();
+/**
+ * Клиентский код может знать или не знать о Конкретном Итераторе или классах
+ * Коллекций, в зависимости от уровня косвенности, который вы хотите сохранить в
+ * своей программе.
+ */
+var collection = new WordsCollection();
+collection.addItem('First');
+collection.addItem('Second');
+collection.addItem('Third');
+var iterator = collection.getIterator();
+console.log('Straight traversal:');
+while (iterator.valid()) {
+    console.log(iterator.next());
+}
+console.log('');
+console.log('Reverse traversal:');
+var reverseIterator = collection.getReverseIterator();
+while (reverseIterator.valid()) {
+    console.log(reverseIterator.next());
+}
